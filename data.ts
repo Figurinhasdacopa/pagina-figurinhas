@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  body {
+    background-color: #080808;
+    color: #f1f5f9;
+  }
+}
+
+/* Custom cards glowing effects for player card containers */
+.card-glow {
+  position: relative;
+  transition: all 0.3s ease;
+}
+.card-glow::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(135deg, rgba(245,158,11,0.5), rgba(0,0,0,0) 60%, rgba(239,68,68,0.5));
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.card-glow:hover::after {
+  opacity: 1;
+}
+
+/* Shiny hover reflection animation */
+.shiny-overlay {
+  position: absolute;
+  top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 30%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.3) 70%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  pointer-events: none;
+}
+.card-glow:hover .shiny-overlay {
+  animation: shiny-reflection 1.2s ease-in-out infinite;
+}
+
+@keyframes shiny-reflection {
+  0% { left: -150%; }
+  100% { left: 150%; }
+}
+
