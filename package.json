@@ -1,6 +1,0 @@
-{
-  "name": "Pack Figurinhas Copa",
-  "description": "Página oficial do Pack de Figurinhas da Copa 2026 para baixar, imprimir e completar o álbum em casa gastando pouco.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
