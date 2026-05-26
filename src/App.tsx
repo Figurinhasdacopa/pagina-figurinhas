@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, FormEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { Analytics } from "@vercel/analytics/react";
 import {
   Check,
   Printer,
@@ -1467,6 +1468,7 @@ Equipe Pack Figurinhas Copa`
         )}
       </AnimatePresence>
 
+      <Analytics />
     </div>
   );
 }
