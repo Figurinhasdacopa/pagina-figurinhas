@@ -441,16 +441,16 @@ Equipe Pack Figurinhas Copa`
               </div>
             </div>
 
-            {/* Right Column: Dynamic Player Rotation & Centered UR เหลือ 7 seats Vagas Badge */}
-            <div className="lg:col-span-5 relative min-h-[420px] h-full flex items-center justify-center select-none overflow-hidden py-4">
-              <div className="grid grid-cols-3 gap-3.5 rotate-12 scale-102 sm:scale-108 opacity-80 transform transition-transform duration-700 hover:rotate-6">
-                <img src="https://www.meusegredo.online/assets/messi-rbg_6p1Z.webp" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-yellow-500/20 border border-yellow-500/30 shadow-2xl animate-pulse" referrerPolicy="no-referrer" alt="Messi" />
-                <img src="https://www.meusegredo.online/assets/mbappe-DxcyZBms.webp" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-blue-500/20 border border-blue-500/30 shadow-2xl mt-6" referrerPolicy="no-referrer" alt="Mbappe" />
-                <img src="https://www.meusegredo.online/assets/yamal-C8gvkqSf.webp" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-red-500/20 border border-red-500/30 shadow-2xl" referrerPolicy="no-referrer" alt="Yamal" />
-                <img src="https://www.meusegredo.online/assets/paqueta-jVEo5keK.webp" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-green-500/20 border border-green-500/30 shadow-2xl -mt-4" referrerPolicy="no-referrer" alt="Paqueta" />
-                <img src="https://www.meusegredo.online/assets/bruno-fernandes-ur4MomSS.webp" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-orange-500/20 border border-orange-500/30 shadow-2xl mt-4" referrerPolicy="no-referrer" alt="Bruno Fernandes" />
-                <img src="https://www.meusegredo.online/assets/rafael-leao-Dvvn3XDq.webp" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-pink-500/20 border border-pink-500/30 shadow-2xl -mt-6" referrerPolicy="no-referrer" alt="Rafael Leão" />
-              </div>
+            {/* Right Column: Dynamic Player Rotation & Centered UR */}
+<div className="lg:col-span-5 relative min-h-[420px] h-full flex items-center justify-center select-none overflow-hidden py-4">
+  <div className="grid grid-cols-3 gap-3.5 rotate-12 scale-102 sm:scale-108 opacity-80 transform transition-transform duration-700 hover:rotate-6">
+    <img src="https://i.ibb.co/hJTQ8KHy/messi.jpg" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-yellow-500/20 border border-yellow-500/30 shadow-2xl animate-pulse" alt="Messi" />
+    <img src="https://i.ibb.co/vvZR2xnb/Chat-GPT-Image-28-de-mai-de-2026-00-05-53.png" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-blue-500/20 border border-blue-500/30 shadow-2xl mt-6" alt="Mbappe" />
+    <img src="https://i.ibb.co/hJr2Cdts/Chat-GPT-Image-28-de-mai-de-2026-00-10-03.png" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-red-500/20 border border-red-500/30 shadow-2xl" alt="Yamal" />
+    <img src="https://i.ibb.co/svrdYsVG/Chat-GPT-Image-28-de-mai-de-2026-00-12-00.png" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-green-500/20 border border-green-500/30 shadow-2xl -mt-4" alt="Paqueta" />
+    <img src="https://i.ibb.co/TBVQ58v1/Chat-GPT-Image-28-de-mai-de-2026-00-17-08.png" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-orange-500/20 border border-orange-500/30 shadow-2xl mt-4" alt="Bruno Fernandes" />
+    <img src="https://i.ibb.co/KpjXgN4c/Chat-GPT-Image-28-de-mai-de-2026-00-20-06.png" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-pink-500/20 border border-pink-500/30 shadow-2xl -mt-6" alt="Rafael Leão" />
+  </div>
 
               {/* Floating Overlay Badge matching design template */}
               <motion.div 
