@@ -27,7 +27,7 @@ export interface FaqItem {
 }
 
 export const PLAYER_CARDS: PlayerCard[] = [
-   {
+  {
     id: "messi",
     name: "Lionel Messi",
     country: "Argentina",
