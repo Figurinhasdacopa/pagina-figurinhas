@@ -27,13 +27,13 @@ export interface FaqItem {
 }
 
 export const PLAYER_CARDS: PlayerCard[] = [
-  {
+   {
     id: "messi",
     name: "Lionel Messi",
     country: "Argentina",
     flag: "🇦🇷",
     role: "Lenda Histórica",
-    imageUrl: "https://www.meusegredo.online/assets/messi-rbg_6p1Z.webp",
+    imageUrl: "https://i.ibb.co/hJTQ8KHy/messi.jpg",
     badgeType: "Legend",
     rarityColor: "from-amber-400 via-yellow-300 to-amber-600"
   },
@@ -43,7 +43,7 @@ export const PLAYER_CARDS: PlayerCard[] = [
     country: "França",
     flag: "🇫🇷",
     role: "Velocidade Pura",
-    imageUrl: "https://www.meusegredo.online/assets/mbappe-DxcyZBms.webp",
+    imageUrl: "https://i.ibb.co/vvZR2xnb/Chat-GPT-Image-28-de-mai-de-2026-00-05-53.png",
     badgeType: "Super Star",
     rarityColor: "from-blue-500 via-indigo-400 to-indigo-600"
   },
@@ -53,7 +53,7 @@ export const PLAYER_CARDS: PlayerCard[] = [
     country: "Espanha",
     flag: "🇪🇸",
     role: "Prodígio de Ouro",
-    imageUrl: "https://www.meusegredo.online/assets/yamal-C8gvkqSf.webp",
+    imageUrl: "https://i.ibb.co/hJr2Cdts/Chat-GPT-Image-28-de-mai-de-2026-00-10-03.png",
     badgeType: "Rookie",
     rarityColor: "from-rose-500 via-pink-400 to-orange-500"
   },
@@ -63,7 +63,7 @@ export const PLAYER_CARDS: PlayerCard[] = [
     country: "Brasil",
     flag: "🇧🇷",
     role: "Habilidade Pura",
-    imageUrl: "https://www.meusegredo.online/assets/paqueta-jVEo5keK.webp",
+    imageUrl: "https://i.ibb.co/svrdYsVG/Chat-GPT-Image-28-de-mai-de-2026-00-12-00.png",
     badgeType: "Golden Hero",
     rarityColor: "from-yellow-400 via-green-400 to-emerald-600"
   },
@@ -73,7 +73,7 @@ export const PLAYER_CARDS: PlayerCard[] = [
     country: "Portugal",
     flag: "🇵🇹",
     role: "Maestro do Meio",
-    imageUrl: "https://www.meusegredo.online/assets/bruno-fernandes-ur4MomSS.webp",
+    imageUrl: "https://i.ibb.co/TBVQ58v1/Chat-GPT-Image-28-de-mai-de-2026-00-17-08.png",
     badgeType: "MasterClass",
     rarityColor: "from-red-500 via-orange-400 to-red-700"
   },
@@ -83,7 +83,7 @@ export const PLAYER_CARDS: PlayerCard[] = [
     country: "Portugal",
     flag: "🇵🇹",
     role: "Drible Explosivo",
-    imageUrl: "https://www.meusegredo.online/assets/rafael-leao-Dvvn3XDq.webp",
+    imageUrl: "https://i.ibb.co/KpjXgN4c/Chat-GPT-Image-28-de-mai-de-2026-00-20-06.png",
     badgeType: "Super Star",
     rarityColor: "from-emerald-400 via-teal-300 to-emerald-600"
   },
@@ -93,7 +93,7 @@ export const PLAYER_CARDS: PlayerCard[] = [
     country: "Espanha",
     flag: "🇪🇸",
     role: "Defesa implacável",
-    imageUrl: "https://www.meusegredo.online/assets/cucurella-T8zYbT83.webp",
+    imageUrl: "https://i.ibb.co/ZRfmdSy8/Chat-GPT-Image-28-de-mai-de-2026-00-22-43.png",
     badgeType: "Golden Hero",
     rarityColor: "from-amber-500 via-orange-400 to-yellow-500"
   },
@@ -103,7 +103,7 @@ export const PLAYER_CARDS: PlayerCard[] = [
     country: "Equador",
     flag: "🇪🇨",
     role: "Força Lateral",
-    imageUrl: "https://www.meusegredo.online/assets/preciado-BFosXlMO.webp",
+    imageUrl: "https://i.ibb.co/TxJmnD4j/Chat-GPT-Image-28-de-mai-de-2026-00-26-57.png",
     badgeType: "MasterClass",
     rarityColor: "from-yellow-500 via-blue-400 to-yellow-600"
   }
