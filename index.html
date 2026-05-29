@@ -4,6 +4,40 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>universocopa26</title>
+    <!-- Safe JSON.stringify handler to prevent circular references in analytics/tracking scripts -->
+    <script>
+      (function() {
+        var originalStringify = JSON.stringify;
+        JSON.stringify = function(value, replacer, space) {
+          var seen = new WeakSet();
+          return originalStringify(value, function(key, val) {
+            if (val && typeof val === "object") {
+              if (seen.has(val)) {
+                return "[Circular]";
+              }
+              seen.add(val);
+              
+              // Prevent walking or serializing DOM nodes or React/synthetic events
+              if (
+                val instanceof Node || 
+                val instanceof HTMLElement || 
+                (val.constructor && typeof val.constructor.name === "string" && (
+                  val.constructor.name.startsWith("HTML") || 
+                  val.constructor.name === "FiberNode" ||
+                  val.constructor.name === "SyntheticBaseEvent"
+                ))
+              ) {
+                return "[Element]";
+              }
+            }
+            if (typeof replacer === "function") {
+              return replacer.call(this, key, val);
+            }
+            return val;
+          }, space);
+        };
+      })();
+    </script>
     <!-- Meta Pixel Code -->
     <script>
     !function(f,b,e,v,n,t,s)
@@ -45,7 +79,7 @@
     var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script")
     ;n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
 
-      ttq.load('D8BPRQJC77U3L7SRFTUG');
+      ttq.load('D8CEARJC77UBL2TTTI3G');
       ttq.page();
     }(window, document, 'ttq');
     </script>
