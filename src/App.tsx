@@ -49,6 +49,16 @@ export default function App() {
     }
   };
 
+  const handleEnableSound = () => {
+    if (heroVideoRef.current) {
+      heroVideoRef.current.muted = false;
+      heroVideoRef.current.currentTime = 0;
+      heroVideoRef.current.play().catch((err) => console.log("Erro ao reproduzir com som:", err));
+    }
+    setHeroVideoMuted(false);
+    setHasInteracted(true);
+  };
+
   // FAQ Expand state
   const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
 
@@ -97,20 +107,20 @@ export default function App() {
   const [pixStatus, setPixStatus] = useState<"pending" | "processing" | "paid">("pending");
   const [pixCopied, setPixCopied] = useState(false);
 
+  // Hero Video State and Reference for Custom Sound Overlay
+  const [heroVideoMuted, setHeroVideoMuted] = useState(true);
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
+
   // Target collection size of Copa components
   const ALBUM_SIZE = 980;
   const SINGLE_ENVELOPE_PRICE = 5.00; // Price of booster box/packs in R$
   const STICKERS_PER_ENVELOPE = 5;
 
   // Simulate savings
-  // Advanced math to show average cost of getting N unique stickers with coupons/repeating probability:
-  // Buying randomly: standard coupon collector approximation: average envelopes needed is high.
-  // Formula: as you need more stickers, the repetition rate increases drastically.
   const calculateCosts = () => {
     if (missingStickers <= 0) return { packs: 0, cost: 0 };
     
-    // Average pack factor ranges from 1.8 (early) to 6.5+ (late) due to repetition probability
-    // For 350 stickers left of 980, the average multiplier is around 2.4 packs per sticker
     let multiplier = 1.3 + (missingStickers / ALBUM_SIZE) * 1.5;
     if (missingStickers > ALbumSizePercent(70)) {
       multiplier = 2.8;
@@ -131,8 +141,7 @@ export default function App() {
   useEffect(() => {
     const slotTimer = setInterval(() => {
       setSlotsLeft((prev) => {
-        if (prev <= 2) return 2; // Keep at least 2 remaining to keep conversion pressure real
-        // 15% chance of decreasing every 15 seconds
+        if (prev <= 2) return 2; // Keep at least 2 remaining
         return Math.random() > 0.855 ? prev - 1 : prev;
       });
     }, 15000);
@@ -142,7 +151,7 @@ export default function App() {
   // Format countdown into MM:SS
   useEffect(() => {
     const timer = setInterval(() => {
-      setSecondsLeft((prev) => (prev > 0 ? prev - 1 : 1200)); // loop back to 20 mins if zeroed
+      setSecondsLeft((prev) => (prev > 0 ? prev - 1 : 1200)); 
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -177,7 +186,6 @@ export default function App() {
 
   useEffect(() => {
     const triggerNotification = () => {
-      // Pick random data
       const name = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)] + " " + ["S.", "M.", "R.", "G.", "K.", "A.", "P.", "V.", "F.", "T.", "L."][Math.floor(Math.random() * 11)];
       const city = BRAZILIAN_CITIES[Math.floor(Math.random() * BRAZILIAN_CITIES.length)];
       const action = BUYER_ACTIONS[Math.floor(Math.random() * BUYER_ACTIONS.length)];
@@ -191,7 +199,6 @@ export default function App() {
         show: true
       });
 
-      // Play subtle sound if enabled
       if (soundOn && "Notification" in window) {
         try {
           const context = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -199,25 +206,22 @@ export default function App() {
           const gain = context.createGain();
           osc.connect(gain);
           gain.connect(context.destination);
-          osc.frequency.setValueAtTime(587.33, context.currentTime); // D5 note
+          osc.frequency.setValueAtTime(587.33, context.currentTime); 
           gain.gain.setValueAtTime(0.05, context.currentTime);
           osc.start();
           osc.stop(context.currentTime + 0.08);
         } catch (e) {
-          // ignore web-audio strict policy blockers
+          // ignore
         }
       }
 
-      // Hide after 5.5 seconds
       setTimeout(() => {
         setLiveNotification((prev) => ({ ...prev, show: false }));
       }, 5500);
     };
 
-    // First trigger after 3s
     const firstTimeout = setTimeout(triggerNotification, 3000);
 
-    // Periodic triggers every 14-22 seconds
     const interval = setInterval(() => {
       triggerNotification();
     }, 18000 + Math.random() * 8000);
@@ -228,14 +232,12 @@ export default function App() {
     };
   }, [soundOn]);
 
-  // Copy button action
   const handlePixCopy = () => {
     const pixKey = "00020101021126580014br.gov.bcb.pix0136G3iF78hMxq-wiapy-payment-copa-2026520400005303986540510.005802BR5924PackFigurinhasCopa6009SaoPaulo62070503***6304EDCB";
     navigator.clipboard.writeText(pixKey);
     setPixCopied(true);
     setTimeout(() => setPixCopied(false), 3000);
 
-    // Simulate instant PIX status success after 5 seconds of copy
     setTimeout(() => {
       setPixStatus("processing");
       setTimeout(() => {
@@ -245,7 +247,6 @@ export default function App() {
     }, 4500);
   };
 
-  // Submit contact info
   const handleEmailSubmit = (e: FormEvent) => {
     e.preventDefault();
     setNameError("");
@@ -273,9 +274,7 @@ export default function App() {
     }, 2500);
   };
 
-  // Sample Sticker Demo Download
   const handleMockDownload = () => {
-    // Generate simple text file to simulate receiving download link
     const element = document.createElement("a");
     const file = new Blob([
       `PARABÉNS! SEU PACK DE FIGURINHAS COPA 2026 FOI ADQUIRIDO COM SUCESSO!
@@ -316,7 +315,7 @@ Equipe Pack Figurinhas Copa`
             <span className="text-black font-extrabold animate-pulse">:</span>
             <span className="bg-black text-white px-2 py-0.5 rounded-md font-bold">{formatTime(secondsLeft).split(':')[1]}</span>
           </div>
-          <span className="hidden md:inline-block bg-black/10 text-[10px] font-black tracking-widest px-2 py-0.5 rounded uppercase">R$ 10,00!</span>
+          <span className="hidden md:inline-block bg-black/10 text-[10px] font-black tracking-widest px-2 py-0.5 rounded uppercase font-mono">R$ 10,00!</span>
         </div>
       </div>
 
@@ -348,7 +347,7 @@ Equipe Pack Figurinhas Copa`
             <button
               onClick={() => setSoundOn(!soundOn)}
               title={soundOn ? "Desativar alertas sonoros de compra" : "Ativar alertas sonoros de compra"}
-              className={`p-2 rounded-lg border transition-all duration-300 ${soundOn ? "bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-md shadow-amber-400/5" : "border-slate-850 text-slate-500 hover:text-slate-300"}`}
+              className={`p-2 rounded-lg border transition-all duration-300 ${soundOn ? "bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-md shadow-amber-400/5" : "border-slate-800 text-slate-500 hover:text-slate-300"}`}
             >
               {soundOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </button>
@@ -357,7 +356,7 @@ Equipe Pack Figurinhas Copa`
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-12 pb-20 sm:pb-24 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-yellow-500/10 via-[#080808] to-[#080808] border-b border-white/5 overflow-hidden">
+      <section className="relative pt-12 pb-20 sm:pb-24 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-yellow-500/10 via-[#080808] to-[#080808] border-b border-white/5 overflow-hidden font-sans">
         {/* Decorative elements */}
         <div className="absolute top-20 left-10 w-72 h-72 bg-yellow-500/5 rounded-full blur-3xl -z-10 animate-pulse pointer-events-none" />
         <div className="absolute top-40 right-10 w-96 h-96 bg-red-600/5 rounded-full blur-3xl -z-10 animate-pulse pointer-events-none" />
@@ -370,43 +369,95 @@ Equipe Pack Figurinhas Copa`
             <div className="lg:col-span-7 flex flex-col justify-center">
               {/* Tagline / Badges */}
               <div className="inline-flex self-start items-center gap-2 px-3.5 py-1.5 bg-yellow-400/10 border border-yellow-400/20 rounded-full leading-none mb-6">
-                <Sparkles className="w-4 h-4 text-yellow-450 text-yellow-500 animate-spin" />
+                <Sparkles className="w-4 h-4 text-yellow-500 animate-spin" />
                 <span className="text-yellow-400 font-display text-xs font-semibold tracking-wide uppercase">
                   100% Organizado • Alta Resolução 300 DPI • Copa 2026
                 </span>
               </div>
 
               {/* Heading */}
-              <h2 className="font-display font-black text-4xl sm:text-5xl lg:text-6xl tracking-tight text-white leading-[0.95] italic uppercase">
+              <h2 className="font-display font-black text-4xl sm:text-5xl lg:text-6xl tracking-tight text-white leading-[0.95] italic uppercase mb-2">
                 FECHE O ÁLBUM DA COPA <br />
                 <span className="bg-gradient-to-r from-yellow-500 via-yellow-400 to-amber-500 bg-clip-text text-transparent drop-shadow-md">
                   SEM PRECISAR DE SORTE!
                 </span>
               </h2>
 
-              <p className="mt-6 text-slate-300 text-sm sm:text-base lg:text-lg font-light leading-relaxed">
+              <p className="mt-4 text-slate-305 text-slate-300 text-sm sm:text-base lg:text-lg font-light leading-relaxed">
                 Todas as figurinhas organizadas por seleção prontas para baixar, imprimir e colar em casa. 
                 <strong className="text-white font-semibold"> Diga adeus aos envelopes repetidos e pare de jogar dinheiro fora!</strong>
               </p>
+
+              {/* Elegant Video Container */}
+              <div className="mt-6 w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 shadow-2xl bg-black/40 backdrop-blur-sm relative group">
+                <video 
+                  ref={heroVideoRef}
+                  src="https://prismainclusiva.com.br/copa/vsl/vireo.mp4"
+                  autoPlay
+                  muted={heroVideoMuted}
+                  loop
+                  playsInline
+                  referrerPolicy="no-referrer"
+                  className="w-full h-auto block"
+                />
+
+                {/* Toque para Ouvir Overlay - Only visible before initial interaction */}
+                {!hasInteracted && (
+                  <div 
+                    onClick={handleEnableSound}
+                    className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 hover:bg-black/50 transition-all duration-300 cursor-pointer z-10 p-4 select-none"
+                  >
+                    <div className="bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-display font-black px-6 py-4 rounded-full shadow-[0_0_30px_rgba(234,179,8,0.6)] flex items-center gap-3 transform hover:scale-105 transition-all duration-300 animate-pulse">
+                      <VolumeX className="w-5 h-5 sm:w-6 sm:h-6 animate-bounce" />
+                      <span className="tracking-wider text-sm sm:text-base font-bold">CLIQUE / TOQUE PARA OUVIR</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Small Mute/Unmute Toggle in bottom-right corner - Visible after initial interaction */}
+                {hasInteracted && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (heroVideoRef.current) {
+                        const newMuted = !heroVideoRef.current.muted;
+                        heroVideoRef.current.muted = newMuted;
+                        setHeroVideoMuted(newMuted);
+                      }
+                    }}
+                    className="absolute bottom-4 right-4 bg-black/80 hover:bg-black text-white rounded-full p-2.5 border border-white/20 shadow-lg hover:scale-110 active:scale-95 transition-all z-20 flex items-center justify-center select-none"
+                    aria-label="Silenciar / Ativar som"
+                    title={heroVideoMuted ? "Ativar som" : "Silenciar"}
+                  >
+                    {heroVideoMuted ? (
+                      <VolumeX className="w-4 h-4 text-red-400 animate-pulse" />
+                    ) : (
+                      <Volume2 className="w-4 h-4 text-green-400" />
+                    )}
+                  </button>
+                )}
+              </div>
 
               {/* Sophisticated Dark Offer Block with Pricing & CTA */}
               <div className="mt-8 p-5 bg-white/5 border border-white/10 rounded-2xl shadow-xl flex flex-col sm:flex-row items-center gap-5 backdrop-blur-sm">
                 <div className="flex flex-col text-left shrink-0">
                   <span className="text-[10px] text-slate-400 line-through tracking-widest uppercase">DE R$ 49,90 POR APENAS:</span>
-                  <div className="flex items-baseline gap-1.5 mt-0.5">
-                    <span className="text-4xl font-black text-yellow-500 font-display font-mono">R$ 10,00</span>
+                  <div className="flex items-baseline gap-1.5 mt-0.5 font-mono">
+                    <span className="text-4xl font-black text-yellow-500 font-display">R$ 10,00</span>
                     <span className="text-xxs text-slate-400 font-bold tracking-wider uppercase">ÚNICO</span>
                   </div>
                 </div>
                 
-                <button
-                  onClick={scrollToComprar}
-                  className="w-full flex-grow bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-display font-black py-4 px-6 rounded-xl text-md uppercase transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] duration-200 hover:-translate-y-0.5 active:translate-y-0 text-center flex items-center justify-center gap-2"
+                <a
+                  href="https://pay.wiapy.com/0bj5S-GDRf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex-grow bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-display font-black py-4 px-6 rounded-xl text-md uppercase transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] duration-200 hover:-translate-y-0.5 active:translate-y-0 text-center flex items-center justify-center gap-2 decoration-none block"
                   id="hero_primary_cta"
                 >
                   <span>QUERO MEU PACK INTEGRAL AGORA</span>
                   <ArrowRight className="w-5 h-5" />
-                </button>
+                </a>
               </div>
 
               <div className="mt-4 flex flex-wrap items-center gap-4 text-slate-400 text-xs font-medium">
@@ -422,16 +473,16 @@ Equipe Pack Figurinhas Copa`
               </div>
             </div>
 
-            {/* Right Column: Dynamic Player Rotation & Centered UR */}
-<div className="lg:col-span-5 relative min-h-[420px] h-full flex items-center justify-center select-none overflow-hidden py-4">
-  <div className="grid grid-cols-3 gap-3.5 rotate-12 scale-102 sm:scale-108 opacity-80 transform transition-transform duration-700 hover:rotate-6">
-    <img src="https://i.ibb.co/hJTQ8KHy/messi.jpg" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-yellow-500/20 border border-yellow-500/30 shadow-2xl animate-pulse" alt="Messi" />
-    <img src="https://i.ibb.co/vvZR2xnb/Chat-GPT-Image-28-de-mai-de-2026-00-05-53.png" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-blue-500/20 border border-blue-500/30 shadow-2xl mt-6" alt="Mbappe" />
-    <img src="https://i.ibb.co/hJr2Cdts/Chat-GPT-Image-28-de-mai-de-2026-00-10-03.png" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-red-500/20 border border-red-500/30 shadow-2xl" alt="Yamal" />
-    <img src="https://i.ibb.co/svrdYsVG/Chat-GPT-Image-28-de-mai-de-2026-00-12-00.png" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-green-500/20 border border-green-500/30 shadow-2xl -mt-4" alt="Paqueta" />
-    <img src="https://i.ibb.co/TBVQ58v1/Chat-GPT-Image-28-de-mai-de-2026-00-17-08.png" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-orange-500/20 border border-orange-500/30 shadow-2xl mt-4" alt="Bruno Fernandes" />
-    <img src="https://i.ibb.co/KpjXgN4c/Chat-GPT-Image-28-de-mai-de-2026-00-20-06.png" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-pink-500/20 border border-pink-500/30 shadow-2xl -mt-6" alt="Rafael Leão" />
-  </div>
+            {/* Right Column: Dynamic Player Rotation & Centered Seats Vagas Badge */}
+            <div className="lg:col-span-5 relative min-h-[420px] h-full flex items-center justify-center select-none overflow-hidden py-4">
+              <div className="grid grid-cols-3 gap-3.5 rotate-12 scale-102 sm:scale-108 opacity-80 transform transition-transform duration-700 hover:rotate-6">
+                <img src="https://i.ibb.co/hJTQ8KHy/messi.jpg" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-yellow-500/20 border border-yellow-500/30 shadow-2xl animate-pulse" referrerPolicy="no-referrer" alt="Messi" />
+                <img src="https://i.ibb.co/vvZR2xnb/Chat-GPT-Image-28-de-mai-de-2026-00-05-53.png" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-blue-500/20 border border-blue-500/30 shadow-2xl mt-6" referrerPolicy="no-referrer" alt="Mbappe" />
+                <img src="https://i.ibb.co/hJr2Cdts/Chat-GPT-Image-28-de-mai-de-2026-00-10-03.png" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-red-500/20 border border-red-500/30 shadow-2xl" referrerPolicy="no-referrer" alt="Yamal" />
+                <img src="https://i.ibb.co/svrdYsVG/Chat-GPT-Image-28-de-mai-de-2026-00-12-00.png" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-green-500/20 border border-green-500/30 shadow-2xl -mt-4" referrerPolicy="no-referrer" alt="Paqueta" />
+                <img src="https://i.ibb.co/TBVQ58v1/Chat-GPT-Image-28-de-mai-de-2026-00-17-08.png" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-orange-500/20 border border-orange-500/30 shadow-2xl mt-4" referrerPolicy="no-referrer" alt="Bruno Fernandes" />
+                <img src="https://i.ibb.co/KpjXgN4c/Chat-GPT-Image-28-de-mai-de-2026-00-20-06.png" className="w-[110px] h-[110px] sm:w-[125px] sm:h-[125px] object-cover rounded-xl bg-pink-500/20 border border-pink-500/30 shadow-2xl -mt-6" referrerPolicy="no-referrer" alt="Rafael Leão" />
+              </div>
 
               {/* Floating Overlay Badge matching design template */}
               <motion.div 
@@ -440,7 +491,7 @@ Equipe Pack Figurinhas Copa`
                 className="absolute bg-yellow-500 text-black p-5 rounded-full font-black text-center -rotate-12 shadow-[0_10px_35px_rgba(234,179,8,0.3)] ring-8 ring-black/95 z-10 w-28 h-28 flex flex-col justify-center items-center"
               >
                 <p className="text-[10px] tracking-tight uppercase font-extrabold leading-none text-black/80">RESTAM</p>
-                <p className="text-4xl leading-none font-display font-black text-black my-0.5">{slotsLeft}</p>
+                <p className="text-4xl leading-none font-display font-black text-black my-0.5 font-mono">{slotsLeft}</p>
                 <p className="text-[9px] tracking-widest uppercase font-extrabold leading-none text-black/80">VAGAS</p>
               </motion.div>
             </div>
@@ -467,7 +518,7 @@ Equipe Pack Figurinhas Copa`
                   className="card-glow bg-[#121212] rounded-xl border border-white/5 p-2.5 text-center flex flex-col justify-between select-none relative h-64 overflow-hidden shadow-md cursor-pointer hover:border-yellow-400/60"
                   title={`${player.name} - Figunha pronta do Pack`}
                 >
-                  {/* Glowing shiny effect line overlay */}
+                  {/* Glowing shiny effect overlay */}
                   <div className="shiny-overlay" />
 
                   {/* Top card bar with Flag and rarity label */}
@@ -475,7 +526,7 @@ Equipe Pack Figurinhas Copa`
                     <span className="font-bold flex items-center gap-0.5">
                       {player.flag} <span>{player.country.substring(0,3).toUpperCase()}</span>
                     </span>
-                    <span className="text-[9px] px-1 bg-yellow-400/20 text-yellow-300 border border-yellow-400/10 rounded font-black uppercase">
+                    <span className="text-[9px] px-1 bg-yellow-400/20 text-yellow-300 border border-yellow-400/10 rounded font-black uppercase font-mono">
                       {player.badgeType}
                     </span>
                   </div>
@@ -489,14 +540,13 @@ Equipe Pack Figurinhas Copa`
                       className="max-h-full object-contain filter drop-shadow-[0_8px_8px_rgba(0,0,0,0.5)] transform hover:scale-108 transition-all duration-300" 
                     />
                     
-                    {/* Resolution badge stamp */}
                     <div className="absolute bottom-1 right-1 bg-black/75 px-1 py-0.5 text-[8px] rounded font-mono border border-white/5 text-slate-300">
                       300 DPI
                     </div>
                   </div>
 
                   {/* Player Name and Description details */}
-                  <div className="mt-2.5 relative z-10">
+                  <div className="mt-2.5 relative z-10 font-sans">
                     <h4 className="font-display font-black text-xs text-white truncate text-center uppercase tracking-tight">
                       {player.name}
                     </h4>
@@ -509,7 +559,7 @@ Equipe Pack Figurinhas Copa`
             </div>
 
             <div className="mt-6 flex justify-center">
-              <div className="inline-flex items-center gap-2 text-slate-400 text-xs px-4 py-2 bg-[#121212] border border-white/5 rounded-full">
+              <div className="inline-flex items-center gap-2 text-slate-400 text-xs px-4 py-2 bg-[#121212] border border-white/5 rounded-full select-none">
                 <Printer className="w-4 h-4 text-yellow-500" />
                 <span>Os arquivos PDF já vêm com corte perfeito milimétrico <strong className="text-white">(49x65mm)</strong> para colar no álbum original.</span>
               </div>
@@ -525,10 +575,10 @@ Equipe Pack Figurinhas Copa`
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-3xl mx-auto mb-14">
-            <span className="text-yellow-500 font-display font-semibold tracking-widest text-xs uppercase bg-yellow-500/5 px-3.5 py-1.5 border border-yellow-550/20 border-yellow-500/20 rounded-full">
+            <span className="text-yellow-500 font-display font-semibold tracking-widest text-xs uppercase bg-yellow-500/5 px-3.5 py-1.5 border border-yellow-500/20 rounded-full">
               SIMULADOR DE ECONOMIA REAL
             </span>
-            <h3 className="font-display font-black text-3xl sm:text-5xl text-white mt-4 tracking-tight leading-tight uppercase italic">
+            <h3 className="font-display font-black text-3xl sm:text-5xl text-white mt-4 tracking-tight leading-tight uppercase italic font-sans pb-1">
               VEJA O QUANTO VOCÊ VAI ECONOMIZAR AGORA MESMO! 💸
             </h3>
             <p className="text-slate-400 mt-3 text-base">
@@ -546,15 +596,13 @@ Equipe Pack Figurinhas Copa`
                 </h4>
                 <p className="text-xs text-slate-400 mt-1">O álbum inteiro da Copa 100% completo exige no total 980 figurinhas.</p>
                 
-                {/* Number selector */}
-                <div className="mt-8 flex items-baseline justify-between">
+                <div className="mt-8 flex items-baseline justify-between select-none">
                   <span className="text-sm font-semibold text-slate-400">Figurinhas faltantes:</span>
                   <span className="font-display font-extrabold text-4xl sm:text-5xl text-yellow-500 ml-2 animate-pulse font-mono">
                     {missingStickers}
                   </span>
                 </div>
 
-                {/* Range inputs slider */}
                 <input 
                   type="range" 
                   min="50" 
@@ -572,8 +620,7 @@ Equipe Pack Figurinhas Copa`
                 </div>
               </div>
 
-              {/* Informative message based on slider value */}
-              <div className="mt-8 p-4 bg-black/40 border border-white/5 rounded-xl flex items-start gap-3">
+              <div className="mt-8 p-4 bg-black/40 border border-white/5 rounded-xl flex items-start gap-3 select-none">
                 <AlertCircle className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
                 <div className="text-xs text-slate-300 leading-relaxed">
                   {missingStickers < 200 ? (
@@ -590,9 +637,8 @@ Equipe Pack Figurinhas Copa`
             {/* Right side: Detailed financial comparison */}
             <div className="lg:col-span-5 bg-gradient-to-br from-black to-[#131313] border-2 border-yellow-500/30 rounded-2xl p-6 sm:p-8 flex flex-col justify-between relative shadow-2xl overflow-hidden min-h-[380px]">
               
-              {/* Highlight badge background effect */}
-              <div className="absolute top-0 right-0 bg-yellow-500 text-black px-4 py-1.5 rounded-bl-xl text-xxs tracking-widest uppercase font-black font-display font-mono">
-                DIFERENÇA CABAL
+              <div className="absolute top-0 right-0 bg-yellow-500 text-black px-4 py-1.5 rounded-bl-xl text-[9px] tracking-widest uppercase font-black font-display font-mono">
+                CONVERSÃO DE GASTOS
               </div>
 
               <div>
@@ -601,31 +647,31 @@ Equipe Pack Figurinhas Copa`
                 </h4>
 
                 {/* Option 1: Store buying */}
-                <div className="mt-6 border-b border-white/5 pb-4">
-                  <span className="text-xs text-red-500 font-bold uppercase tracking-wide block mb-1">COMPRANDO ENVELOPES COMUNS:</span>
+                <div className="mt-6 border-b border-white/5 pb-4 font-mono">
+                  <span className="text-xs text-red-500 font-bold uppercase tracking-wide block mb-1 font-sans">COMPRANDO ENVELOPES COMUNS:</span>
                   <div className="flex items-baseline justify-between">
                     <div>
                       <span className="font-display text-2xl font-black text-red-500">R$ {simResults.cost.toFixed(2)}</span>
-                      <span className="text-xs text-slate-500 block">A R$ {SINGLE_ENVELOPE_PRICE.toFixed(2)} o pacotinho</span>
+                      <span className="text-xs text-slate-500 block font-sans font-medium mt-0.5">A R$ {SINGLE_ENVELOPE_PRICE.toFixed(2)} o pacotinho</span>
                     </div>
-                    <span className="text-[11px] bg-red-950/40 text-red-400 border border-red-900/30 px-2 py-0.5 rounded font-bold">
+                    <span className="text-[11px] bg-red-950/40 text-red-400 border border-red-900/30 px-2 py-0.5 rounded font-bold font-sans">
                       ~ {simResults.packs} pacotinhos
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-2 italic">
-                    *Cálculo matemático real considerando probabilidade média de obter {missingStickers} figurinhas exclusivas sem contar dezenas de repetidas acumuladas.
+                  <p className="text-[11px] text-slate-400 mt-2 italic font-sans font-normal leading-relaxed">
+                    *Cálculo estatístico real considerando probabilidade média de obter {missingStickers} figurinhas exclusivas sem contar duplicatas repetidas acumuladas.
                   </p>
                 </div>
 
                 {/* Option 2: Our digital pack */}
-                <div className="mt-4 pt-1">
-                  <span className="text-xs text-emerald-400 font-bold uppercase tracking-wide block mb-1">COMPRANDO NOSSO PACK DIGITAL:</span>
+                <div className="mt-4 pt-1 font-mono">
+                  <span className="text-xs text-emerald-400 font-bold uppercase tracking-wide block mb-1 font-sans">COMPRANDO NOSSO PACK DIGITAL:</span>
                   <div className="flex items-baseline justify-between">
                     <div>
-                      <span className="font-display text-3xl font-black text-emerald-400">R$ 10,00</span>
-                      <span className="text-xs text-slate-400 block font-medium">Apenas pagamento único de R$ 10</span>
+                      <span className="font-display text-3xl font-black text-emerald-400 font-mono">R$ 10,00</span>
+                      <span className="text-xs text-slate-400 block font-medium font-sans mt-0.5">Apenas pagamento único de R$ 10</span>
                     </div>
-                    <span className="text-[11px] bg-emerald-950/40 text-emerald-300 border border-emerald-905 border-emerald-900/40 px-2.5 py-1 rounded font-black uppercase tracking-wider animate-pulse">
+                    <span className="text-[11px] bg-emerald-950/40 text-emerald-300 border border-emerald-900/40 px-2.5 py-1 rounded font-black uppercase tracking-wider animate-pulse font-sans">
                       Economize R$ {(simResults.cost - 10) > 0 ? (simResults.cost - 10).toFixed(2) : "0"}!
                     </span>
                   </div>
@@ -636,18 +682,20 @@ Equipe Pack Figurinhas Copa`
               <div className="mt-8">
                 <div className="bg-[#121212] border border-white/5 rounded-xl p-3 mb-4 text-center">
                   <span className="text-xs text-white">Sua Economia Real Estimada:</span>
-                  <p className="font-display text-2xl font-black text-yellow-500 mt-0.5">
-                    R$ {(simResults.cost - 10) > 0 ? (simResults.cost - 10).toFixed(2) : "0,00"} economizados!
+                  <p className="font-display text-2xl font-black text-yellow-500 mt-0.5 font-mono">
+                    R$ {(simResults.cost - 10) > 0 ? (simResults.cost - 10).toFixed(2) : "0,00"}
                   </p>
                 </div>
 
-                <button
-                  onClick={scrollToComprar}
-                  className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-display font-black rounded-xl shadow-lg shadow-emerald-500/10 transition-all font-bold tracking-tight text-center uppercase flex items-center justify-center gap-1.5 text-sm duration-200"
+                <a
+                  href="https://pay.wiapy.com/0bj5S-GDRf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-display font-black rounded-xl shadow-lg shadow-emerald-500/10 transition-all font-bold tracking-tight text-center uppercase flex items-center justify-center gap-1.5 text-sm duration-200 decoration-none block"
                   id="simulator_cta_btn"
                 >
                   <Coins className="w-5 h-5 animate-bounce" /> EXIGIR MEU DESCONTO E ECONOMIZAR AGORA
-                </button>
+                </a>
               </div>
             </div>
 
@@ -677,13 +725,13 @@ Equipe Pack Figurinhas Copa`
             {/* Step 1 */}
             <div className="bg-[#121212] border border-white/5 p-8 rounded-2xl relative shadow-md flex flex-col justify-between">
               <span className="text-7xl font-display font-black text-stone-700/10 absolute top-3 right-5 select-none z-0">01</span>
-              <div className="relative z-10">
+              <div className="relative z-10 font-sans">
                 <div className="w-12 h-12 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex items-center justify-center mb-6">
                   <Download className="w-6 h-6 text-yellow-500" />
                 </div>
                 <h4 className="font-display font-bold text-xl text-white">1. Baixe os Arquivos</h4>
                 <p className="text-sm text-slate-400 mt-3 leading-relaxed">
-                  Confirme o pagamento de R$ 10,00 e acesse imediatamente o painel de downloads por e-mail. Faça o download rápido de todas as figurinhas digitais organizadas separadamente por seleção nacional em formato PDF.
+                  Confirme o pagamento de R$ 10,00 e acesse imediatamente o painel de downloads no e-mail com as figurinhas digitais organizadas separadamente por seleção nacional em formato PDF.
                 </p>
               </div>
             </div>
@@ -691,7 +739,7 @@ Equipe Pack Figurinhas Copa`
             {/* Step 2 */}
             <div className="bg-[#121212] border border-white/5 p-8 rounded-2xl relative shadow-md flex flex-col justify-between">
               <span className="text-7xl font-display font-black text-stone-700/10 absolute top-3 right-5 select-none z-0">02</span>
-              <div className="relative z-10">
+              <div className="relative z-10 font-sans">
                 <div className="w-12 h-12 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex items-center justify-center mb-6">
                   <Printer className="w-6 h-6 text-yellow-500" />
                 </div>
@@ -705,43 +753,45 @@ Equipe Pack Figurinhas Copa`
             {/* Step 3 */}
             <div className="bg-[#121212] border border-white/5 p-8 rounded-2xl relative shadow-md flex flex-col justify-between">
               <span className="text-7xl font-display font-black text-stone-700/10 absolute top-3 right-5 select-none z-0">03</span>
-              <div className="relative z-10">
+              <div className="relative z-10 font-sans">
                 <div className="w-12 h-12 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex items-center justify-center mb-6">
                   <Check className="w-6 h-6 text-yellow-500" />
                 </div>
                 <h4 className="font-display font-bold text-xl text-white">3. Complete Seu Álbum</h4>
                 <p className="text-sm text-slate-400 mt-3 leading-relaxed">
-                  Recorte as figurinhas seguindo as sutis linhas de corte padrão que já acompanham os arquivos de 300 DPI. Aplique-as diretamente nos espaços do álbum original da Copa 2026 e sinta o prazer incomparável de ver o álbum 100% completo!
+                  Recorte as figurinhas seguindo as sutis linhas de corte padrão que já acompanham os arquivos de 300 DPI. Aplique-as diretamente nos espaços do álbum original da Copa 2026 e sinta o prazer de ver o álbum completo!
                 </p>
               </div>
             </div>
 
           </div>
 
-          <div className="mt-14 bg-gradient-to-r from-black to-[#131313] rounded-2xl p-6 sm:p-8 border border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="mt-14 bg-gradient-to-r from-black to-[#131313] rounded-2xl p-6 sm:p-8 border border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 select-none">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded-xl tracking-tight hidden sm:block">
                 <BookOpen className="w-6 h-6" />
               </div>
-              <div className="text-left">
+              <div className="text-left font-sans">
                 <h4 className="font-display font-bold text-lg text-white">Quer testar com as mãos sem risco nenhum?</h4>
                 <p className="text-xs sm:text-sm text-slate-400 mt-1">Nossa garantia condicional robusta de 7 dias garante satisfação total ou os R$ 10,00 de volta.</p>
               </div>
             </div>
-            <button
-              onClick={scrollToComprar}
-              className="px-6 py-3.5 bg-yellow-400 hover:bg-yellow-350 text-slate-950 font-display font-bold text-sm rounded-xl tracking-wide uppercase transition-all shrink-0 hover:scale-102 flex items-center justify-center cursor-pointer"
+            <a
+              href="https://pay.wiapy.com/0bj5S-GDRf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-6 py-3.5 bg-yellow-400 hover:bg-yellow-350 text-slate-950 font-display font-bold text-sm rounded-xl tracking-wide uppercase transition-all shrink-0 hover:scale-102 flex items-center justify-center cursor-pointer decoration-none inline-block font-sans"
               id="how_works_cta"
             >
               Exigir Pack de R$ 10
-            </button>
+            </a>
           </div>
 
         </div>
       </section>
 
       {/* Testimonials area (Depoimentos de clientes) */}
-      <section id="depoimentos" className="py-20 bg-[#080808] relative border-b border-white/5">
+      <section id="depoimentos" className="py-20 bg-[#080808] relative border-b border-white/5 font-sans">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-3xl mx-auto mb-14">
@@ -756,7 +806,7 @@ Equipe Pack Figurinhas Copa`
             </p>
           </div>
 
-          {/* User WhatsApp Screenshots Feedbacks - Swipable Horizontal Track */}
+          {/* User WhatsApp Screenshots Feedbacks */}
           <div className="mb-16">
             <div className="flex items-center justify-between mb-6 max-w-6xl mx-auto">
               <h4 className="text-xs uppercase text-slate-500 font-mono tracking-widest font-semibold">PRINT DE CONVERSAS DE CLIENTES SATISFEITOS</h4>
@@ -766,181 +816,140 @@ Equipe Pack Figurinhas Copa`
               </div>
             </div>
             
-            {/* Screenshots Display - Horizontal Drag/Swipe Scroll */}
             <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-6 max-w-6xl mx-auto px-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent select-none">
               {SCREENSHOT_FEEDBACKS.map((screenshot) => (
                 <motion.div
                   key={screenshot.id}
                   whileHover={{ scale: 1.02 }}
-                  className="snap-start shrink-0 w-[260px] sm:w-[300px] bg-[#121212] border border-white/5 rounded-2xl overflow-hidden p-3 shadow-lg hover:border-yellow-400/40 group cursor-grab active:cursor-grabbing"
-                  title="Arrastar depoimento de cliente"
+                  className="snap-start shrink-0 w-[260px] sm:w-[300px] bg-[#121212] rounded-3xl border border-white/5 p-4 shadow-xl select-none"
                 >
-                  <div className="bg-black/40 rounded-xl overflow-hidden relative border border-white/5 flex items-center justify-center">
-                    <img 
-                      src={screenshot.url} 
-                      alt={screenshot.alt} 
-                      referrerPolicy="no-referrer"
-                      className="w-full h-auto object-contain object-center transform transition-transform group-hover:scale-101"
-                    />
-                  </div>
-                  <div className="mt-2.5 px-1 py-0.5 flex items-center justify-between">
-                    <span className="text-[10px] uppercase font-mono tracking-wide text-slate-400 font-bold">Feedback Original</span>
-                    <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1 font-mono">
-                      <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Confirmado
+                  <img 
+                    src={screenshot.url} 
+                    alt="Conversa de cliente no whatsapp demonstrando que obteve o pack" 
+                    referrerPolicy="no-referrer"
+                    className="w-full h-auto rounded-2xl filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] object-contain" 
+                  />
+                  <div className="mt-3.5 flex items-center justify-between text-slate-400 text-xxs px-1">
+                    <span className="font-semibold flex items-center gap-1 text-emerald-500">
+                      <Check className="w-3 h-3" /> Transação ID de Teste
                     </span>
+                    <span className="font-mono text-slate-500">{screenshot.id}</span>
                   </div>
                 </motion.div>
               ))}
             </div>
           </div>
 
-          {/* Written reviews cards below - Swipable Horizontal Track */}
-          <hr className="border-white/5 my-12" />
-
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-6 max-w-6xl mx-auto">
-              <h4 className="text-xs uppercase text-slate-500 font-mono tracking-widest font-semibold">AVALIAÇÕES DETALHADAS DE COLECIONADORES</h4>
-              <div className="flex items-center gap-1.5 text-slate-500 text-[11px] font-mono animate-pulse">
-                <span>Arraste para o lado / Deslize</span>
-                <span className="text-yellow-500 font-bold">➔</span>
-              </div>
-            </div>
-
-            <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-6 max-w-6xl mx-auto px-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent select-none">
-              {WRITTEN_FEEDBACKS.map((review) => (
-                <div 
-                  key={review.id}
-                  className="snap-start shrink-0 w-[290px] sm:w-[350px] bg-[#121212]/60 border border-white/5 p-6 rounded-2xl hover:border-yellow-400/25 transition-all flex flex-col justify-between cursor-grab active:cursor-grabbing"
-                >
-                  <div>
-                    <div className="flex items-center gap-1 mb-3">
-                      {[...Array(review.rating)].map((_, i) => (
-                        <Star key={i} className="w-4.5 h-4.5 fill-yellow-500 text-yellow-500" />
-                      ))}
-                    </div>
-                    <p className="text-sm text-slate-300 italic leading-relaxed">
-                      "{review.text}"
-                    </p>
-                  </div>
-
-                  <div className="mt-6 flex items-center justify-between border-t border-white/5 pt-4">
-                    <div className="flex items-center gap-3">
-                      <img 
-                        src={review.avatar} 
-                        alt={review.name} 
-                        referrerPolicy="no-referrer"
-                        className="w-10 h-10 rounded-full object-cover border border-white/10" 
-                      />
-                      <div>
-                        <h5 className="font-display font-bold text-sm text-white">{review.name}</h5>
-                        <p className="text-[10px] text-slate-500 font-medium">{review.location}</p>
+          <div className="border-t border-white/5 pt-16 max-w-6xl mx-auto">
+            <h4 className="text-xs uppercase text-slate-500 font-mono tracking-widest font-semibold mb-8 text-center sm:text-left">DEPOIMENTOS ESCRITOS RECENTES</h4>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {WRITTEN_FEEDBACKS.map((written, index) => {
+                return (
+                  <div 
+                    key={index} 
+                    className="bg-[#121212] p-6 rounded-2xl border border-white/5 shadow-lg relative flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center gap-1.5 text-yellow-500 mb-4">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-current text-yellow-500" />
+                        ))}
                       </div>
+                      
+                      <p className="text-slate-300 text-sm leading-relaxed italic">
+                        "{written.text}"
+                      </p>
                     </div>
-                    <span className="text-[9px] font-bold uppercase py-1 px-2 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/15 font-mono">
-                      {review.tag}
-                    </span>
+
+                    <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-xs text-slate-400 font-medium">
+                      <div className="flex items-center gap-1.5">
+                        <Users className="w-4 h-4 text-slate-500" />
+                        <span className="text-white font-semibold">{written.author}</span>
+                      </div>
+                      <span className="text-xxs px-2 py-0.5 bg-yellow-500/10 text-yellow-400 rounded-full border border-yellow-500/10 font-mono">{written.location}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* Trust & Refund Warranty Area */}
+      <section id="garantia" className="py-20 bg-gradient-to-b from-[#090b11] to-[#080808] relative border-b border-white/5 font-sans">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="max-w-4xl mx-auto bg-[#121212] border border-yellow-500/10 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/5 rounded-full blur-2xl pointer-events-none" />
+            
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+              
+              <div className="md:col-span-4 flex justify-center">
+                <div className="relative">
+                  <div className="w-32 h-32 sm:w-40 sm:h-40 bg-yellow-500/10 rounded-full flex items-center justify-center border-4 border-yellow-500/20 shadow-inner">
+                    <ShieldCheck className="w-16 h-16 sm:w-20 sm:h-20 text-yellow-500 animate-pulse" />
                   </div>
                 </div>
-              ))}
+              </div>
+
+              <div className="md:col-span-8 text-center md:text-left space-y-4">
+                <span className="text-yellow-500 font-display font-semibold tracking-wider text-xs uppercase bg-yellow-500/5 px-3 py-1 rounded">
+                  DIREITO DE CONFORMIDADE E SATISFAÇÃO MIL
+                </span>
+                <h3 className="font-display font-black text-2xl sm:text-4xl text-white tracking-tight uppercase italic">
+                  GARANTIA DE REEMBOLSO DE 7 DIAS!
+                </h3>
+                <p className="text-slate-350 text-sm sm:text-base leading-relaxed">
+                  Se por qualquer motivo técnico você não conseguir baixar as figurinhas, ou achar que a nitidez de 300 DPI não serve para o seu propósito, basta nos enviar um e-mail em até 7 dias úteis a partir da confirmação que fazemos o estorno imediato do seu Pix de R$ 10,00 sem quaisquer burocracias. Economia garantida com risco zero absoluto!
+                </p>
+                <div className="pt-2 flex flex-wrap justify-center md:justify-start gap-4 text-xs font-mono font-bold text-slate-500">
+                  <span className="flex items-center gap-1.5">🛡️ COMPRA TOTALMENTE PROTEGIDA</span>
+                  <span className="flex items-center gap-1.5">⚡ DEVOLUÇÃO INSTANTÂNEA</span>
+                </div>
+              </div>
+
             </div>
+
           </div>
 
         </div>
       </section>
 
-      {/* 7 Days Conditional Guarantee Section */}
-      <section id="garantia" className="py-20 bg-gradient-to-br from-[#121212] to-[#080808] relative border-b border-white/5 overflow-hidden">
-        {/* Decorative circle glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-yellow-500/5 rounded-full blur-3xl -z-10" />
-
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+      {/* Main Bottom Anchor Display Price Block & Action CTA Box */}
+      <section id="comprar" className="py-24 bg-gradient-to-b from-[#080808] to-black relative font-sans">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_var(--tw-gradient-stops))] from-yellow-500/5 via-transparent to-transparent pointer-events-none" />
+        
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           
-          <div className="w-20 h-20 bg-gradient-to-tr from-yellow-500 to-amber-500 rounded-full flex items-center justify-center mx-auto shadow-xl shadow-yellow-500/10 border-2 border-yellow-400/30 mb-6 font-display font-black text-slate-950">
-            <Award className="w-10 h-10 text-slate-950 stroke-[2.5]" />
-          </div>
+          <div className="bg-[#121212] border-2 border-yellow-500/30 rounded-[32px] p-8 sm:p-14 shadow-[0_0_50px_rgba(234,179,8,0.1)] max-w-4xl mx-auto relative overflow-hidden">
+            <div className="absolute top-0 right-10 w-44 h-44 bg-yellow-500/5 rounded-full blur-3xl pointer-events-none" />
 
-          <span className="text-xxs uppercase text-yellow-500 font-mono font-bold tracking-widest bg-yellow-500/10 border border-yellow-500/20 px-3.5 py-1.5 rounded-full mb-3 inline-block">
-            COMPRA 100% BLINDADA E SEGURA
-          </span>
-
-          <h3 className="font-display font-black text-3xl sm:text-5xl text-white mt-3 tracking-tight leading-tight">
-            GARANTIA CONDICIONAL DE 7 DIAS <br />
-            <span className="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent">
-              SEU ÁLBUM COMPLETO OU SEU DINHEIRO DE VOLTA!
-            </span>
-          </h3>
-
-          <div className="mt-8 bg-[#121212] border border-white/5 p-6 sm:p-8 rounded-2xl text-left shadow-2xl space-y-4">
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-              O nosso compromisso número um é com a alegria e felicidade de ver o álbum completo. Confiamos tanto na qualidade fantástica do material digital que criamos esta garantia de ferro.
-            </p>
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-              <strong>Como funciona de forma transparente:</strong> Adquira hoje o seu Pack por apenas <strong className="text-white">R$ 10,00</strong>. Acesse a pasta do Google Drive, visualize e baixe todos os PDFs em alta definição, teste a resolução de impressão e confira todos os jogadores e craques (Messi, Mbappé, Yamal, Paquetá, e mais de 980 figurinhas no gabarito completo).
-            </p>
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-              Se em até <strong className="text-yellow-500">7 dias</strong> você não ficar impressionado com o capricho estético do design, ou se você ou seu filho não amarem as figurinhas impressas, basta nos mandar uma mensagem ou responder ao e-mail comercial. Nós reembolsamos absolutamente cada centavo investido. Devolução total sem rodeios burocráticos. O risco do teste é 100% nosso.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/5 text-xs text-slate-400 font-medium font-mono">
-              <span className="flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" /> Reembolso Instantâneo sem burocracia
+            <div className="mb-6">
+              <span className="bg-yellow-500 text-black px-4.5 py-1.5 rounded-full font-black text-xxs tracking-widest uppercase inline-block font-display font-mono">
+                PAGAMENTO ÚNICO • ACESSO VITALÍCIO
               </span>
-              <span className="flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" /> Canal de Suporte Exclusivo e Rápido
-              </span>
-              <span className="flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" /> Proteção de Dados de criptografia SSL
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-8 flex justify-center">
-            <button
-              onClick={scrollToComprar}
-              className="px-8 py-4.5 bg-yellow-400 hover:bg-yellow-350 text-slate-950 font-display font-black rounded-xl shadow-lg transition-transform hover:scale-103 duration-150 uppercase tracking-tight flex items-center gap-2 cursor-pointer"
-              id="guarantee_cta_btn"
-            >
-              Exigir Meu Acesso Seguro por R$ 10,00
-            </button>
-          </div>
-
-        </div>
-      </section>
-
-      {/* Pricing and Final Persuasive Pitch Section */}
-      <section id="comprar" className="py-24 bg-[#080808] relative border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="text-red-500 font-display font-bold text-xs uppercase bg-red-500/10 border border-red-500/20 px-3.5 py-1 rounded-full animate-pulse inline-block">
-              SÓ MAIS {slotsLeft} LICENÇAS DISPONÍVEIS COM ESTE DESCONTO
-            </span>
-            <h3 className="font-display font-black text-3xl sm:text-5xl text-white mt-4 tracking-tight uppercase italic">
-              FECHE O ÁLBUM SEM ESVAZIAR O BOLSO!
-            </h3>
-            <p className="text-slate-400 mt-2 text-sm sm:text-base">
-              Acesso vitalício instantâneo de download. Você não joga no escuro: compre agora, imprima quando quiser e tenha as atualizações grátis garantidas.
-            </p>
-          </div>
-
-          {/* Master Offer box */}
-          <div className="max-w-lg mx-auto bg-gradient-to-br from-[#121212] to-black border-2 border-yellow-500 rounded-3xl p-8 sm:p-10 relative shadow-2xl">
-            
-            {/* Urgent Badge */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-yellow-400 text-slate-950 tracking-wider font-display font-black text-[10px] sm:text-xs px-6 py-2 rounded-full uppercase shadow-md flex items-center gap-1 animate-bounce">
-              <Flame className="w-4.5 h-4.5 fill-slate-950 text-slate-950 stroke-[2.5]" /> OFERTA ESPECIAL VITALÍCIA
+              <h3 className="font-display font-black text-3xl sm:text-5xl text-white tracking-tight leading-tight uppercase italic mt-4">
+                GARANTA O PACK INTEGRAL COMPLETO
+              </h3>
+              <p className="text-slate-400 mt-3 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+                Pare de rasgar notas de R$ 5,00 em bancas e torcer para não vir repetidas. Obtenha agora todo o gabarito das 48 seleções em um único arquivo PDF.
+              </p>
             </div>
 
-            <div className="text-center mt-4">
+            {/* Custom pricing layout matches professional landing conversion formulas */}
+            <div className="py-6 sm:py-8 bg-black/60 rounded-2xl max-w-md mx-auto border border-white/5 shadow-inner select-none font-sans">
               <span className="text-slate-500 text-sm line-through font-semibold">De R$ 49,90</span>
-              <div className="flex justify-center items-center gap-1.5 mt-1">
-                <span className="text-slate-400 text-lg font-bold">Por apenas</span>
-                <span className="font-display font-black text-5xl sm:text-6xl text-yellow-500 tracking-tight font-mono">
+              <div className="flex justify-center items-center gap-1.5 mt-1 font-mono">
+                <span className="text-slate-400 text-lg font-bold font-sans">Por apenas</span>
+                <span className="font-display font-black text-5xl sm:text-6xl text-yellow-500 tracking-tight">
                   R$ 10,00
                 </span>
-                <span className="text-slate-500 text-xs font-semibold block self-end pb-1.5 font-mono">PAGAMENTO ÚNICO</span>
+                <span className="text-slate-500 text-xs font-semibold block self-end pb-1.5 font-sans">PAGAMENTO ÚNICO</span>
               </div>
-              <p className="text-slate-400 text-xs mt-2">Sem taxas mensais escondidas ou cobranças recorrentes.</p>
+              <p className="text-slate-400 text-xs mt-2 font-sans font-normal">Sem taxas mensais escondidas ou cobranças recorrentes.</p>
             </div>
 
             {/* List of features included with high impact icons */}
@@ -1010,7 +1019,7 @@ Equipe Pack Figurinhas Copa`
             </div>
 
             {/* Submitting CTA opening interactive safe checkout */}
-            <div className="mt-8 space-y-3.5">
+            <div className="mt-8 space-y-3.5 font-sans">
               <a
                 href="https://pay.wiapy.com/0bj5S-GDRf"
                 target="_blank"
@@ -1037,7 +1046,7 @@ Equipe Pack Figurinhas Copa`
       <section className="py-20 bg-[#080808] relative border-b border-white/5">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 font-sans">
           
-          <div className="text-center mb-14">
+          <div className="text-center mb-14 font-sans">
             <span className="text-amber-400 font-display font-semibold tracking-widest text-xs uppercase bg-amber-400/5 px-3.5 py-1.5 border border-amber-400/20 rounded-full">
               DÚVIDAS FREQUENTES
             </span>
@@ -1049,7 +1058,7 @@ Equipe Pack Figurinhas Copa`
             </p>
           </div>
 
-          <div className="space-y-4 text-left max-w-3xl mx-auto">
+          <div className="space-y-4 text-left max-w-3xl mx-auto font-sans">
             {FAQ_ITEMS.map((faq) => {
               const isExpanded = expandedFaq === faq.id;
               return (
@@ -1110,7 +1119,7 @@ Equipe Pack Figurinhas Copa`
             © 2026 Pack Figurinhas Copa. Todos os direitos reservados. Produto digital para fins de uso do consumidor final doméstico para completar o álbum. Não possuímos nenhuma afiliação mercadológica, patrocínio ou parceria técnica com a Federação Internacional de Futebol Associado (FIFA), Copa do Mundo do Catar ou de 2026, ou com a Distribuidora Panini do Brasil Ltda. Todas as marcas nominativas registradas pertencem única e exclusivamente aos seus respectivos proprietários.
           </p>
 
-          <p className="text-[10px] text-slate-600">
+          <p className="text-[10px] text-slate-605">
             Adquirindo o pack você concorda com os termos de recebimento por e-mail e download digital imediato sob posse e condições de nossa política de privacidade.
           </p>
         </div>
@@ -1126,7 +1135,6 @@ Equipe Pack Figurinhas Copa`
             transition={{ type: "spring", stiffness: 350, damping: 25 }}
             className="fixed bottom-6 right-6 z-50 bg-[#121212]/95 backdrop-blur-md border border-yellow-500/20 text-white p-4 rounded-xl shadow-2xl flex items-center gap-3.5 max-w-sm w-[calc(100vw-3rem)] pointer-events-none select-none font-sans"
           >
-            {/* Stamp dynamic style */}
             <div className="w-10 h-10 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-lg flex items-center justify-center shrink-0">
               <Sparkles className="w-5 h-5 text-yellow-500 animate-spin" strokeWidth={2.5} />
             </div>
@@ -1137,7 +1145,7 @@ Equipe Pack Figurinhas Copa`
                 <span className="text-[10px] text-slate-500 font-normal">({liveNotification.city})</span>
               </div>
               <p className="text-slate-300 font-medium mt-0.5">{liveNotification.action}</p>
-              <span className="text-[10px] text-slate-500 block mt-1 flex items-center gap-1">
+              <span className="text-[10px] text-slate-500 block mt-1 flex items-center gap-1 font-mono">
                 <Clock className="w-3 h-3 text-slate-600" /> {liveNotification.time}
               </span>
             </div>
@@ -1166,7 +1174,7 @@ Equipe Pack Figurinhas Copa`
                 </div>
                 <button
                   onClick={() => {
-                    if (pixStatus === "processing") return; // block during processes
+                    if (pixStatus === "processing") return; 
                     setShowCheckout(false);
                   }}
                   className="text-slate-400 hover:text-white text-xs font-semibold px-2 py-1 bg-black hover:bg-neutral-900 rounded border border-white/5 transition-colors cursor-pointer"
@@ -1176,7 +1184,7 @@ Equipe Pack Figurinhas Copa`
               </div>
 
               {/* Progress bar steps */}
-              <div className="grid grid-cols-3 text-center text-xxs font-mono font-bold uppercase py-2 bg-black/40 text-slate-500 border-b border-white/5">
+              <div className="grid grid-cols-3 text-center text-[10px] font-mono font-bold uppercase py-2 bg-black/40 text-slate-500 border-b border-white/5 select-none">
                 <span className={checkoutStep === "info" ? "text-yellow-500 font-black" : "text-slate-500"}>1. Contato</span>
                 <span className={checkoutStep === "pay" ? "text-yellow-500 font-black" : "text-slate-500"}>2. Pagamento</span>
                 <span className={checkoutStep === "success" ? "text-emerald-400 font-black" : "text-slate-500"}>3. Download</span>
@@ -1200,7 +1208,7 @@ Equipe Pack Figurinhas Copa`
                     </p>
 
                     <div>
-                      <label className="block text-xxs uppercase tracking-wider text-slate-400 font-bold mb-1.5">Nome Completo</label>
+                      <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1.5 font-sans">Nome Completo</label>
                       <input 
                         type="text" 
                         required
@@ -1212,7 +1220,7 @@ Equipe Pack Figurinhas Copa`
                     </div>
 
                     <div>
-                      <label className="block text-xxs uppercase tracking-wider text-slate-400 font-bold mb-1.5">Seu melhor E-mail (Onde receberá o pack)</label>
+                      <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1.5 font-sans">Seu melhor E-mail (Onde receberá o pack)</label>
                       <input 
                         type="email" 
                         required
@@ -1224,7 +1232,7 @@ Equipe Pack Figurinhas Copa`
                     </div>
 
                     <div>
-                      <label className="block text-xxs uppercase tracking-wider text-slate-400 font-bold mb-1.5">WhatsApp / Celular (Opcional)</label>
+                      <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1.5 font-sans">WhatsApp / Celular (Opcional)</label>
                       <input 
                         type="tel" 
                         placeholder="Ex: (11) 98765-4321" 
@@ -1236,7 +1244,7 @@ Equipe Pack Figurinhas Copa`
 
                     <button
                       type="submit"
-                      className="w-full py-4 bg-yellow-400 hover:bg-yellow-350 text-slate-950 font-display font-black rounded-xl text-center uppercase tracking-wider mt-2 transition-all block focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm cursor-pointer"
+                      className="w-full py-4 bg-yellow-400 hover:bg-yellow-350 text-slate-950 font-display font-black rounded-xl text-center uppercase tracking-wider mt-2 transition-all block focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm cursor-pointer font-bold"
                     >
                       Prosseguir Para o Pagamento • R$ 10,00
                     </button>
@@ -1247,16 +1255,16 @@ Equipe Pack Figurinhas Copa`
                 {checkoutStep === "pay" && (
                   <div>
                     {/* Select Method Tab */}
-                    <div className="grid grid-cols-2 gap-3 mb-6 bg-black p-1 rounded-xl border border-white/5">
+                    <div className="grid grid-cols-2 gap-3 mb-6 bg-black p-1 rounded-xl border border-white/5 font-sans">
                       <button
                         onClick={() => setPaymentMethod("pix")}
-                        className={`py-2.5 rounded-lg text-xs font-bold font-display uppercase flex items-center justify-center gap-1.5 transition-all cursor-pointer ${paymentMethod === "pix" ? "bg-neutral-900 text-yellow-500 border border-white/10 shadow-md" : "text-slate-500 hover:text-slate-350"}`}
+                        className={`py-2.5 rounded-lg text-xs font-bold font-display uppercase flex items-center justify-center gap-1.5 transition-all cursor-pointer ${paymentMethod === "pix" ? "bg-neutral-900 text-yellow-500 border border-white/10 shadow-md" : "text-slate-500 hover:text-slate-300"}`}
                       >
                         <QrCode className="w-4 h-4 text-emerald-400" /> PIX (Imediato)
                       </button>
                       <button
                         onClick={() => setPaymentMethod("card")}
-                        className={`py-2.5 rounded-lg text-xs font-bold font-display uppercase flex items-center justify-center gap-1.5 transition-all cursor-pointer ${paymentMethod === "card" ? "bg-neutral-900 text-yellow-500 border border-white/10 shadow-md" : "text-slate-500 hover:text-slate-350"}`}
+                        className={`py-2.5 rounded-lg text-xs font-bold font-display uppercase flex items-center justify-center gap-1.5 transition-all cursor-pointer ${paymentMethod === "card" ? "bg-neutral-900 text-yellow-500 border border-white/10 shadow-md" : "text-slate-500 hover:text-slate-300"}`}
                       >
                         <CreditCard className="w-4 h-4 text-blue-400" /> Cartão de Crédito
                       </button>
@@ -1265,7 +1273,7 @@ Equipe Pack Figurinhas Copa`
                     {/* METHOD A: PIX CHOSEN */}
                     {paymentMethod === "pix" && (
                       <div className="text-center space-y-4">
-                        <span className="text-xxs uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/15 py-1 px-3 rounded-full font-bold inline-block font-mono">
+                        <span className="text-[10px] uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/15 py-1 px-3 rounded-full font-bold inline-block font-mono">
                           CHAVE PIX GERADA EM AMBIENTE SEGURO
                         </span>
 
@@ -1278,14 +1286,14 @@ Equipe Pack Figurinhas Copa`
                               className="w-full h-full object-contain"
                             />
                           ) : (
-                            <div className="text-slate-900 font-bold flex flex-col items-center gap-2">
+                            <div className="text-slate-900 font-bold flex flex-col items-center gap-2 font-mono">
                               <RefreshCw className="w-8 h-8 animate-spin text-yellow-500" />
                               <span className="text-xs">Verificando PIX...</span>
                             </div>
                           )}
                         </div>
 
-                        <div className="text-xs text-slate-350 bg-black p-3 rounded-xl border border-white/5 text-left space-y-1 max-w-sm mx-auto font-mono">
+                        <div className="text-xs text-slate-300 bg-black p-3 rounded-xl border border-white/5 text-left space-y-1 max-w-sm mx-auto font-mono">
                           <p><strong>Destinatário:</strong> PrismaInclusiva LTDA</p>
                           <p><strong>Valor:</strong> R$ 10,00</p>
                         </div>
@@ -1301,7 +1309,7 @@ Equipe Pack Figurinhas Copa`
                           </button>
                         </div>
 
-                        <div className="p-3 bg-yellow-500/5 rounded-xl border border-yellow-500/10 text-xxs text-slate-400 text-left leading-relaxed">
+                        <div className="p-3 bg-yellow-500/5 rounded-xl border border-yellow-500/10 text-[10px] text-slate-450 text-slate-400 text-left leading-relaxed">
                           💡 <strong>Para simular a compra:</strong> Clique no botão "COPIAR CÓDIGO PIX COPIA-E-COLA". O sistema simulador detectará e efetuará o pagamento de teste em 5 segundos, te liberando automaticamente para a área de downloads!
                         </div>
                       </div>
@@ -1325,19 +1333,19 @@ Equipe Pack Figurinhas Copa`
                                 required
                                 value={cardNum}
                                 onChange={(e) => setCardNum(e.target.value)}
-                                className="w-full px-3 py-2 bg-[#080808] border border-white/10 rounded-lg text-xs text-white placeholder-slate-650 focus:outline-none focus:border-yellow-500 font-mono"
+                                className="w-full px-3 py-2 bg-[#080808] border border-white/10 rounded-lg text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-500 font-mono"
                               />
                             </div>
 
                             <div>
-                              <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">Nome Impresso no Cartão</label>
+                              <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1 font-sans">Nome Impresso no Cartão</label>
                               <input 
                                 type="text" 
                                 placeholder="EX: CARLOS S SANTOS" 
                                 required
                                 value={cardName}
                                 onChange={(e) => setCardName(e.target.value.toUpperCase())}
-                                className="w-full px-3 py-2 bg-[#080808] border border-white/10 rounded-lg text-xs text-white placeholder-slate-650 focus:outline-none focus:border-yellow-500 font-sans"
+                                className="w-full px-3 py-2 bg-[#080808] border border-white/10 rounded-lg text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-500 font-sans"
                               />
                             </div>
 
@@ -1350,8 +1358,8 @@ Equipe Pack Figurinhas Copa`
                                   required
                                   value={cardExpiry}
                                   onChange={(e) => setCardExpiry(e.target.value)}
-                                  className="w-full px-3 py-2 bg-[#080808] border border-white/10 rounded-lg text-xs text-white placeholder-slate-650 focus:outline-none focus:border-yellow-500 font-mono"
-                                />
+                                  className="w-full px-3 py-2 bg-[#080808] border border-white/10 rounded-lg text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-500 font-mono"
+                               />
                               </div>
                               <div>
                                 <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">CVV / Código</label>
@@ -1362,7 +1370,7 @@ Equipe Pack Figurinhas Copa`
                                   required
                                   value={cardCvv}
                                   onChange={(e) => setCardCvv(e.target.value)}
-                                  className="w-full px-3 py-2 bg-[#080808] border border-white/10 rounded-lg text-xs text-white placeholder-slate-650 focus:outline-none focus:border-yellow-500 font-mono"
+                                  className="w-full px-3 py-2 bg-[#080808] border border-white/10 rounded-lg text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-500 font-mono"
                                 />
                               </div>
                             </div>
@@ -1378,8 +1386,7 @@ Equipe Pack Figurinhas Copa`
                       </form>
                     )}
 
-                    {/* Back to Step 1 info button */}
-                    <div className="mt-4 pt-3 border-t border-white/5 text-center">
+                    <div className="mt-4 pt-3 border-t border-white/5 text-center font-sans">
                       <button
                         onClick={() => {
                           if (pixStatus === "processing") return;
@@ -1410,7 +1417,7 @@ Equipe Pack Figurinhas Copa`
                       O acesso integral e as pastas estão liberados! Enviamos os links de acesso com as figurinhas digitais separadas por seleção em alta definição diretamente para o e-mail: <strong className="text-white bg-black px-1.5 py-0.5 rounded font-mono border border-white/5">{buyerEmail || "seuemail@exemplo.com"}</strong>.
                     </p>
 
-                    <div className="p-4 bg-black border border-white/5 rounded-xl text-left max-w-sm mx-auto space-y-2">
+                    <div className="p-4 bg-black border border-white/5 rounded-xl text-left max-w-sm mx-auto space-y-2 font-sans">
                       <span className="text-[10px] text-slate-500 uppercase font-bold block font-mono">Garantido no e-mail:</span>
                       <p className="text-[11px] text-slate-300 flex items-start gap-1.5 leading-tight">
                         <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" /> Amostra do Gabarito de Impressão imediato.
@@ -1421,7 +1428,7 @@ Equipe Pack Figurinhas Copa`
                     </div>
 
                     {/* DOWNLOAD ACTION TARGETS */}
-                    <div className="space-y-3 pt-2">
+                    <div className="space-y-3 pt-2 font-display">
                       <button
                         onClick={handleMockDownload}
                         className="w-full py-4 bg-yellow-400 hover:bg-yellow-350 text-slate-950 font-display font-black rounded-xl text-center uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all text-sm shadow-lg shadow-yellow-500/10 cursor-pointer"
@@ -1434,7 +1441,7 @@ Equipe Pack Figurinhas Copa`
                           setShowCheckout(false);
                           setCheckoutStep("info");
                         }}
-                        className="text-xs text-slate-400 hover:text-white transition-colors underline block mx-auto py-1 cursor-pointer"
+                        className="text-xs text-slate-450 text-slate-400 hover:text-white transition-colors underline block mx-auto py-1 cursor-pointer font-sans"
                       >
                         Voltar para a Página Principal
                       </button>
