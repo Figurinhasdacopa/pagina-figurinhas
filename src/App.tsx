@@ -322,19 +322,7 @@ Equipe Pack Figurinhas Copa`
 
       {/* Main Elegant Header / Mini Logo */}
       <header className="border-b border-white/5 bg-[#080808]/95 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-tr from-yellow-500 to-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/20 border border-yellow-400/20">
-              <span className="font-display font-black text-slate-950 text-xl tracking-tight leading-none">C26</span>
-            </div>
-            <div>
-              <h1 className="font-display text-lg font-bold tracking-tight text-white flex items-center gap-1.5">
-                Pack Figurinhas Copa <span className="text-amber-400 text-xs py-0.5 px-2 bg-amber-400/10 rounded-full border border-amber-400/20 font-mono font-medium">BETA 2026</span>
-              </h1>
-              <p className="text-[10px] text-slate-400 font-medium">Todas as figurinhas originais em 300 DPI</p>
-            </div>
-          </div>
-
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
           <nav className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm font-medium">
             <button onClick={() => {
               const el = document.getElementById("funcionamento");
@@ -363,13 +351,6 @@ Equipe Pack Figurinhas Copa`
               className={`p-2 rounded-lg border transition-all duration-300 ${soundOn ? "bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-md shadow-amber-400/5" : "border-slate-850 text-slate-500 hover:text-slate-300"}`}
             >
               {soundOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-            </button>
-            <button 
-              onClick={scrollToComprar}
-              className="bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-display font-medium px-4 py-2 rounded-lg shadow-md shadow-yellow-400/10 transition-all transform hover:-translate-y-0.5 text-xs sm:text-sm active:translate-y-0"
-              id="header_cta_btn"
-            >
-              Comprar R$ 10,00
             </button>
           </div>
         </div>
