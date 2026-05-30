@@ -14,7 +14,7 @@
   }
 }
 
-/* Custom cards glowing effects for player card containers */
+/* Efeito holográfico e brilhante nos cards */
 .card-glow {
   position: relative;
   transition: all 0.3s ease;
@@ -33,7 +33,7 @@
   opacity: 1;
 }
 
-/* Shiny hover reflection animation */
+/* Reflexo metálico brilhante ao passar o mouse */
 .shiny-overlay {
   position: absolute;
   top: 0; left: -100%; width: 50%; height: 100%;
@@ -57,3 +57,31 @@
   100% { left: 150%; }
 }
 
+/* 🚀 ANIMAÇÃO DE CARROSSEL INFINITO (MARQUEE) */
+.animate-marquee-left {
+  display: flex;
+  width: max-content;
+  animation: marquee-left 25s linear infinite;
+}
+
+.animate-marquee-right {
+  display: flex;
+  width: max-content;
+  animation: marquee-right 25s linear infinite;
+}
+
+@keyframes marquee-left {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-right {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0%); }
+}
+
+/* Pausa a animação ao passar o mouse */
+.animate-marquee-left:hover,
+.animate-marquee-right:hover {
+  animation-play-state: paused;
+}
